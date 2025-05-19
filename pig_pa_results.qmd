@@ -70,15 +70,23 @@ clean_pig_data |>
   filter(site_cm == 35 | site_cm == 45) |> 
   filter(wavelength == 1310) |>  
   mutate(week = case_when(date == '2025-02-11' ~ 0, date == '2025-02-25' ~ 2, TRUE ~ 4)) |> 
-  ggplot(aes(x = as_factor(week), y = as.numeric(value), fill = as_factor(site_cm))) + geom_col(position = 'dodge2') +
+  ggplot(aes(x = as_factor(week), y = as.numeric(value), fill = fct_rev(as_factor(site_cm)))) + geom_col(position = 'dodge2') +
   labs(y = "Collagen in Wall",
        x = "Week",
-       title = "Effect of APC on Pig Esophageal Fibrosis and Reversibility with CB47 Stricture Injection") +
-  annotate("text", x=1, y=4100, label = "Before Treatment") +
+       title = "Effect of APC on Pig Esophageal Fibrosis and\nReversibility with CB47 Stricture Injection") +
+  annotate("text", x=1, y=4200, label = "Before Treatment") +
   annotate("text", x=2, y=6100, label = "After Fibrosis") +
   annotate("text", x=3, y=6800, label = "After Drug Treatment") +
-  annotate("text", x=3.2, y=6300, label = "Control") +
-  annotate("text", x=2.75, y=4800, label = "CB47\nTreatment") +
+  annotate("text", x=3.24, y=4650, label = "CB47 Treatment") +
+  annotate("text", x=2.78, y=6300, label = "Control") +
+  annotate("text", x=0.78, y=200, label = "45 cm") +
+  annotate("text", x=1.78, y=200, label = "45 cm") +
+  annotate("text", x=2.78, y=200, label = "45 cm") +
+  annotate("text", x=1.22, y=200, label = "35 cm") +
+  annotate("text", x=2.22, y=200, label = "35 cm") +
+  annotate("text", x=3.22, y=200, label = "35 cm") +
+  theme_linedraw(base_size = 14) +
   theme(legend.position = "none") +
-  theme_linedraw(base_size = 16)
+  scale_fill_manual(values = c("gray75", "green"))
+  
 ```
