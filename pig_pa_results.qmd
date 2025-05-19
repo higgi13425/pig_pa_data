@@ -89,4 +89,5 @@ clean_pig_data |>
   theme(legend.position = "none") +
   scale_fill_manual(values = c("gray75", "green"))
   
+ggsave(scale = 1.2, filename = "pig_pa_5_barplot.jpg")
 ```
