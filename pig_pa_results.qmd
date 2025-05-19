@@ -1,0 +1,84 @@
+---
+title: "pig_pa_data_plots"
+format: html
+editor: visual
+---
+
+## Load Libraries
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(here)
+library(janitor)
+library(lubridate)
+```
+
+## Read Data
+
+Let's read in the data
+
+```{r}
+pig_pa <- readxl::read_excel('PIG PAUS data_yc_LJ.xlsx') |> 
+  janitor::remove_empty('rows') |> 
+  janitor::clean_names()
+```
+
+## Start Plotting
+
+Start with facet_grid
+
+```{r}
+pig_pa |> 
+  filter(pig  == "PAPC-5") |> 
+  mutate(drug = case_when(x1_vehicle_2_cb47 == 1 ~ "vehicle",
+                          x1_vehicle_2_cb47 == 2 ~ "CB47",
+                          TRUE ~ "none")) |> 
+  select(date, site_cm, wavelength, treated_apc, drug, measurement_value) |> 
+  mutate(treated = case_when(treated_apc ==0 ~ 0,
+                             TRUE ~ 1)) |> 
+  rename(value = measurement_value) |> 
+  mutate(apc = factor(treated)) |> 
+  mutate(date = lubridate::ymd(date)) |> 
+  select(date, site_cm, apc, wavelength, drug, value) ->
+clean_pig_data
+
+clean_pig_data |> 
+  ggplot(aes(x = factor(wavelength), y = as.numeric(value), 
+             color = apc, shape = drug)) + 
+  geom_point() +
+  facet_grid(date ~ site_cm) +
+  labs(title = "Pig Esophagus Experiment 5 (PAPC-5)",
+       subtitle = "Longitudinal over 3 time points, 7 locations by cm, with and without APC to induce fibrosis, and CB47 drug to reverse fibrosis",
+       x = "Wavelength", y = "PA signal value",
+       caption = "APC performed after measurement on 02-11, CB47 injected after measurement on 02-25" )
+
+ggsave(scale = 1.2, filename = "pig_pa_5 plot.jpg")
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+```{r}
+clean_pig_data |> 
+  filter(site_cm == 35 | site_cm == 45) |> 
+  filter(wavelength == 1310) |>  
+  mutate(week = case_when(date == '2025-02-11' ~ 0, date == '2025-02-25' ~ 2, TRUE ~ 4)) |> 
+  ggplot(aes(x = as_factor(week), y = as.numeric(value), fill = as_factor(site_cm))) + geom_col(position = 'dodge2') +
+  labs(y = "Collagen in Wall",
+       x = "Week",
+       title = "Effect of APC on Pig Esophageal Fibrosis and Reversibility with CB47 Stricture Injection") +
+  annotate("text", x=1, y=4100, label = "Before Treatment") +
+  annotate("text", x=2, y=6100, label = "After Fibrosis") +
+  annotate("text", x=3, y=6800, label = "After Drug Treatment") +
+  annotate("text", x=3.2, y=6300, label = "Control") +
+  annotate("text", x=2.75, y=4800, label = "CB47\nTreatment") +
+  theme(legend.position = "none") +
+  theme_linedraw(base_size = 16)
+```
